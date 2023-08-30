@@ -7,8 +7,8 @@ export class App {
     bikes: Bike[] = []
     rents: Rent[] = []
 
-    findUser(email: string): User | undefined {
-        return this.users.find(user => { return user.email === email})
+    findUser(email: string): User {
+        return this.users.find(user => user.email === email)
     }
 
     registerUser(user: User): void {
