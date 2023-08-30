@@ -17,7 +17,7 @@ const rent1 = Rent.create([], bike, user, today, twoDaysFromToday)
 const user2 = new User('Maria Clara', 'maria@mail.com', '3123')
 
 const app = new App()
-app.addUser(user)
+app.registerUser(user)
 
 console.log(app.findUser('maria@mail.com'))
 
