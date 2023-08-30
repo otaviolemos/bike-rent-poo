@@ -1,6 +1,7 @@
 import { Bike } from "./bike";
 import { Rent } from "./rent";
 import { User } from "./user";
+import crypto from 'crypto'
 
 export class App {
     users: User[] = []
@@ -17,6 +18,7 @@ export class App {
                 throw new Error('Duplicate user.')
             }
         }
+        user.id = crypto.randomUUID()
         this.users.push(user)
     }
 }
