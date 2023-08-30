@@ -18,5 +18,6 @@ const user2 = new User('Maria Clara', 'maria@mail.com', '3123')
 
 const app = new App()
 app.addUser(user)
-app.addUser(user2)
-console.log(app.users)
+
+console.log(app.findUser('maria@mail.com'))
+

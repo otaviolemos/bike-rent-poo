@@ -7,9 +7,15 @@ export class App {
     bikes: Bike[] = []
     rents: Rent[] = []
 
-    addUser(user: User): void {
-        if (this.users.some(rUser => { return rUser.email === user.email })) {
-            throw new Error('User with same email already registered.')
+    findUser(email: string): User | undefined {
+        return this.users.find(user => { return user.email === email})
+    }
+
+    registerUser(user: User): void {
+        for (const rUser of this.users) {
+            if (rUser.email === user.email) {
+                throw new Error('Duplicate user.')
+            }
         }
         this.users.push(user)
     }
