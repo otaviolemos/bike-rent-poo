@@ -37,33 +37,37 @@ export class App {
             this.users.splice(userIndex, 1)
             return
         }
-        throw new Error('User not found.')
+        throw new Error('User does not exist.')
     }
-
-    rentBike(bikeId: string, userEmail: string, startDate: Date, endDate: Date) {
+    
+    rentBike(bikeId: string, userEmail: string, startDate: Date, endDate: Date): void {
         const bike = this.bikes.find(bike => bike.id === bikeId)
         if (!bike) {
             throw new Error('Bike not found.')
         }
-        const user = this.users.find(user => user.email === userEmail)
+        const user = this.findUser(userEmail)
         if (!user) {
             throw new Error('User not found.')
         }
-        const bikeRents = 
-            this.rents.filter(rent => rent.bike.id === bikeId && !rent.dateReturned)
+        const bikeRents = this.rents.filter(rent =>
+            rent.bike.id === bikeId && !rent.dateReturned
+        )
         const newRent = Rent.create(bikeRents, bike, user, startDate, endDate)
         this.rents.push(newRent)
     }
 
-    returnBike(bikeId: string, userEmail: string): void {
+    returnBike(bikeId: string, userEmail: string) {
         const today = new Date()
         const rent = this.rents.find(rent => 
-            rent.bike.id === bikeId && 
+            rent.bike.id === bikeId &&
             rent.user.email === userEmail &&
-            rent.dateFrom < today
+            rent.dateReturned === undefined &&
+            rent.dateFrom <= today
         )
         if (rent) {
             rent.dateReturned = today
+            return
         }
+        throw new Error('Rent not found.')
     }
 }
