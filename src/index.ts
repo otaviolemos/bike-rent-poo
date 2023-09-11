@@ -2,34 +2,25 @@ import { App } from "./app";
 import { Bike } from "./bike";
 import { Rent } from "./rent";
 import { User } from "./user";
+import sinon from 'sinon'
 
-const app = new App()
-const bike = new Bike('caloi mountain', 'mountain bike', 100, 200, 150.5, 
-    'My bike', 5, [])
-const bikeId = app.registerBike(bike)
-console.log(app.bikes)
-const user1 = new User('Jose', 'jose@mail.com', '1234')
-const user2 = new User('Maria', 'maria@mail.com', '1234')
-app.registerUser(user1)
-app.registerUser(user2)
+async function main() {
+    const clock = sinon.useFakeTimers();
+    const app = new App()
+    const user1 = new User('Jose', 'jose@mail.com', '1234')
+    await app.registerUser(user1)
+    const bike = new Bike('caloi mountainbike', 'mountain bike',
+        1234, 1234, 100.0, 'My bike', 5, [])
+    app.registerBike(bike)
+    console.log('Bike disponível: ', bike.available)
+    app.rentBike(bike.id, user1.email)
+    console.log('Bike disponível: ', bike.available)
+    clock.tick(1000 * 60 * 65)
+    console.log(app.returnBike(bike.id, user1.email))
+    console.log('Bike disponível: ', bike.available)
+}
 
-const yesterday = new Date()
-yesterday.setDate(yesterday.getDate() - 1)
-const today = new Date()
-const tomorrow = new Date()
-tomorrow.setDate(tomorrow.getDate() + 1)
-const dayAfterTomorrow = new Date()
-dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2)
-const twoDaysFromToday = new Date()
-twoDaysFromToday.setDate(twoDaysFromToday.getDate() + 3)
-
-app.rentBike(bikeId, 'jose@mail.com', yesterday, today)
-
-console.log('Antes do retorno', app.rents)
-
-app.returnBike(bikeId, 'jose@mail.com')
-
-console.log('Depois do retorno', app.rents)
+main()
 
 
 
