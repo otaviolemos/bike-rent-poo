@@ -4,6 +4,9 @@ import { Rent } from "./rent";
 import { User } from "./user";
 import { Location } from "./location";
 import crypto from 'crypto'
+import { BikeNotFoundError } from "./errors/bike-not-found-error";
+import { UnavailableBikeError } from "./errors/unavailable-bike-error";
+import { UserNotFoundError } from "./errors/user-not-found-error";
 
 export class App {
     users: User[] = []
@@ -12,7 +15,9 @@ export class App {
     crypt: Crypt = new Crypt()
 
     findUser(email: string): User {
-        return this.users.find(user => user.email === email)
+        const user = this.users.find(user => user.email === email)
+        if (!user) throw new UserNotFoundError()
+        return user
     }
 
     async registerUser(user: User): Promise<string> {
@@ -52,17 +57,11 @@ export class App {
     }
     
     rentBike(bikeId: string, userEmail: string): void {
-        const bike = this.bikes.find(bike => bike.id === bikeId)
-        if (!bike) {
-            throw new Error('Bike not found.')
-        }
+        const bike = this.findBike(bikeId)
         if (!bike.available) {
-            throw new Error('Unavailable bike.')
+            throw new UnavailableBikeError()
         }
         const user = this.findUser(userEmail)
-        if (!user) {
-            throw new Error('User not found.')
-        }
         bike.available = false
         const newRent = new Rent(bike, user, new Date())
         this.rents.push(newRent)
@@ -95,9 +94,15 @@ export class App {
     }
 
     moveBikeTo(bikeId: string, location: Location) {
-        const bike = this.bikes.find(bike => bike.id === bikeId)
+        const bike = this.findBike(bikeId)
         bike.location.latitude = location.latitude
         bike.location.longitude = location.longitude
+    }
+
+    findBike(bikeId: string): Bike {
+        const bike = this.bikes.find(bike => bike.id === bikeId)
+        if (!bike) throw new BikeNotFoundError()
+        return bike
     }
 }
 
