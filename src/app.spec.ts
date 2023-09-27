@@ -75,4 +75,12 @@ describe('App', () => {
             app.findUser('fake@mail.com')
         }).toThrow(UserNotFoundError)
     })
+
+    it('should correctly authenticate user', async () => {
+        const user = new User('jose', 'jose@mail.com', '1234')
+        const app = new App()
+        await app.registerUser(user)
+        await expect(app.authenticate('jose@mail.com', '1234'))
+            .resolves.toBeTruthy()
+    })
 })
