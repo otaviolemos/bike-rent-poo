@@ -7,6 +7,7 @@ import crypto from 'crypto'
 import { BikeNotFoundError } from "./errors/bike-not-found-error";
 import { UnavailableBikeError } from "./errors/unavailable-bike-error";
 import { UserNotFoundError } from "./errors/user-not-found-error";
+import { DuplicateUserError } from "./errors/duplicate-user-error";
 
 export class App {
     users: User[] = []
@@ -23,7 +24,7 @@ export class App {
     async registerUser(user: User): Promise<string> {
         for (const rUser of this.users) {
             if (rUser.email === user.email) {
-                throw new Error('Duplicate user.')
+                throw new DuplicateUserError()
             }
         }
         const newId = crypto.randomUUID()
@@ -53,7 +54,7 @@ export class App {
             this.users.splice(userIndex, 1)
             return
         }
-        throw new Error('User does not exist.')
+        throw new UserNotFoundError()
     }
     
     rentBike(bikeId: string, userEmail: string): void {

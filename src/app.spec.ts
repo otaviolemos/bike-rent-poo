@@ -6,6 +6,7 @@ import { Location } from "./location"
 import { BikeNotFoundError } from "./errors/bike-not-found-error"
 import { UnavailableBikeError } from "./errors/unavailable-bike-error"
 import { UserNotFoundError } from "./errors/user-not-found-error"
+import { DuplicateUserError } from "./errors/duplicate-user-error"
 
 describe('App', () => {
     it('should correctly calculate the rent amount', async () => {
@@ -82,5 +83,32 @@ describe('App', () => {
         await app.registerUser(user)
         await expect(app.authenticate('jose@mail.com', '1234'))
             .resolves.toBeTruthy()
+    })
+
+    it('should throw duplicate user error when trying to register a duplicate user', async () => {
+        const user = new User('jose', 'jose@mail.com', '1234')
+        const app = new App()
+        await app.registerUser(user)
+        await expect(app.registerUser(user)).rejects.toThrow(DuplicateUserError)
+    })
+
+    it('should correctly remove registered user', async () => {
+        const user = new User('jose', 'jose@mail.com', '1234')
+        const app = new App()
+        await app.registerUser(user)
+        app.removeUser(user.email)
+        expect(() => { app.findUser(user.email) }).toThrow(UserNotFoundError)
+    })
+
+    it ('should throw user not found error when trying to remove an unregistered user', () => {
+        const app = new App()
+        expect(() => { app.removeUser('fake@mail.com') }).toThrow(UserNotFoundError)
+    })
+
+    it ('should correctly register user', async () => {
+        const user = new User('jose', 'jose@mail.com', '1234')
+        const app = new App()
+        await app.registerUser(user)
+        expect(app.findUser(user.email)).toEqual(user)
     })
 })
