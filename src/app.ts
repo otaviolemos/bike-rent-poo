@@ -10,6 +10,7 @@ import { DuplicateUserError } from "./errors/duplicate-user-error";
 import { RentRepo } from "./ports/rent-repo";
 import { UserRepo } from "./ports/user-repo";
 import { BikeRepo } from "./ports/bike-repo";
+import { RentNotFoundError } from "./errors/rent-not-found";
 
 export class App {
     crypt: Crypt = new Crypt()
@@ -18,7 +19,7 @@ export class App {
         readonly userRepo: UserRepo,
         readonly bikeRepo: BikeRepo,
         readonly rentRepo: RentRepo
-    ) {}
+    ) { }
 
     async findUser(email: string): Promise<User> {
         const user = await this.userRepo.find(email)
@@ -28,7 +29,7 @@ export class App {
 
     async registerUser(user: User): Promise<string> {
         if (await this.userRepo.find(user.email)) {
-          throw new DuplicateUserError()
+            throw new DuplicateUserError()
         }
         const encryptedPassword = await this.crypt.encrypt(user.password)
         user.password = encryptedPassword
@@ -48,7 +49,7 @@ export class App {
         await this.findUser(email)
         await this.userRepo.remove(email)
     }
-    
+
     async rentBike(bikeId: string, userEmail: string): Promise<string> {
         const bike = await this.findBike(bikeId)
         if (!bike.available) {
@@ -64,7 +65,7 @@ export class App {
     async returnBike(bikeId: string, userEmail: string): Promise<number> {
         const now = new Date()
         const rent = await this.rentRepo.findOpen(bikeId, userEmail)
-        if (!rent) throw new Error('Rent not found.')
+        if (!rent) throw new RentNotFoundError()
         rent.end = now
         await this.rentRepo.update(rent.id, rent)
         rent.bike.available = true
@@ -96,7 +97,7 @@ export class App {
 }
 
 function diffHours(dt2: Date, dt1: Date) {
-  var diff = (dt2.getTime() - dt1.getTime()) / 1000;
-  diff /= (60 * 60);
-  return Math.abs(diff);
+    var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= (60 * 60);
+    return Math.abs(diff);
 }
