@@ -18,7 +18,7 @@ export class App {
         readonly userRepo: UserRepo,
         readonly bikeRepo: BikeRepo,
         readonly rentRepo: RentRepo
-    ) {}
+    ) { }
 
     async findUser(email: string): Promise<User> {
         const user = await this.userRepo.find(email)
@@ -28,7 +28,7 @@ export class App {
 
     async registerUser(user: User): Promise<string> {
         if (await this.userRepo.find(user.email)) {
-          throw new DuplicateUserError()
+            throw new DuplicateUserError()
         }
         const encryptedPassword = await this.crypt.encrypt(user.password)
         user.password = encryptedPassword
@@ -45,10 +45,15 @@ export class App {
     }
 
     async removeUser(email: string): Promise<void> {
-        await this.findUser(email)
-        await this.userRepo.remove(email)
+        const openRents = await this.rentRepo.findOpenRentsFor(email);
+        if (openRents.length > 0) {
+            throw new Error('User has open rents, cannot be removed.');
+        }
+        await this.findUser(email);
+        await this.userRepo.remove(email);
     }
-    
+
+
     async rentBike(bikeId: string, userEmail: string): Promise<string> {
         const bike = await this.findBike(bikeId)
         if (!bike.available) {
@@ -96,7 +101,7 @@ export class App {
 }
 
 function diffHours(dt2: Date, dt1: Date) {
-  var diff = (dt2.getTime() - dt1.getTime()) / 1000;
-  diff /= (60 * 60);
-  return Math.abs(diff);
+    var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= (60 * 60);
+    return Math.abs(diff);
 }

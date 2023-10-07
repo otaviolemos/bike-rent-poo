@@ -9,6 +9,6 @@ export class Rent {
         public user: User,
         public start: Date,
         public id?: string
-    ) {}
+    ) { }
 }
 
