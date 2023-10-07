@@ -10,7 +10,6 @@ import { DuplicateUserError } from "./errors/duplicate-user-error";
 import { RentRepo } from "./ports/rent-repo";
 import { UserRepo } from "./ports/user-repo";
 import { BikeRepo } from "./ports/bike-repo";
-import { RentNotFoundError } from "./errors/rent-not-found";
 
 export class App {
     crypt: Crypt = new Crypt()
@@ -46,9 +45,14 @@ export class App {
     }
 
     async removeUser(email: string): Promise<void> {
-        await this.findUser(email)
-        await this.userRepo.remove(email)
+        const openRents = await this.rentRepo.findOpenRentsFor(email);
+        if (openRents.length > 0) {
+            throw new Error('User has open rents, cannot be removed.');
+        }
+        await this.findUser(email);
+        await this.userRepo.remove(email);
     }
+
 
     async rentBike(bikeId: string, userEmail: string): Promise<string> {
         const bike = await this.findBike(bikeId)
@@ -65,7 +69,7 @@ export class App {
     async returnBike(bikeId: string, userEmail: string): Promise<number> {
         const now = new Date()
         const rent = await this.rentRepo.findOpen(bikeId, userEmail)
-        if (!rent) throw new RentNotFoundError()
+        if (!rent) throw new Error('Rent not found.')
         rent.end = now
         await this.rentRepo.update(rent.id, rent)
         rent.bike.available = true

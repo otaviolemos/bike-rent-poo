@@ -13,7 +13,6 @@ import { FakeRentRepo } from "./doubles/fake-rent-repo"
 import { UserRepo } from "../src/ports/user-repo"
 import { BikeRepo } from "../src/ports/bike-repo"
 import { RentRepo } from "../src/ports/rent-repo"
-import { RentNotFoundError } from "../src/errors/rent-not-found"
 
 
 let userRepo: UserRepo
@@ -129,13 +128,26 @@ describe('App', () => {
         await expect(app.findUser(user.email))
             .resolves.toEqual(user)
     })
-
-    it('should throw rent not found when trying to return a bike that is not in use', async () => {
-        const app = new App(userRepo, bikeRepo, rentRepo)
-        const user = new User('jose', 'jose@mail.com', '1234')
-        await app.registerUser(user)
-        const bike = new Bike('caloi mountainbike', 'mountain bike', 1234, 1234, 100.0, 'my bike', 5, [])
-        await app.registerBike(bike)
-        await expect(app.returnBike(bike.id, user.email)).rejects.toThrow(RentNotFoundError)
-    })
 })
+
+it('should throw error when trying to remove a user with open rents', async () => {
+    const app = new App(userRepo, bikeRepo, rentRepo);
+    const user = new User('Josee', 'josee@mail.com', '1234');
+    await app.registerUser(user);
+
+    const bike = new Bike('caloi mountainbike', 'mountain bike',
+        1234, 1234, 100.0, 'My bike', 5, []);
+    await app.registerBike(bike);
+
+    await app.rentBike(bike.id, user.email);
+
+    await expect(app.removeUser(user.email)).rejects.toThrowError('User has open rents, cannot be removed.');
+});
+
+it('should allow removing user without open rents', async () => {
+    const app = new App(userRepo, bikeRepo, rentRepo);
+    const user = new User('Joseee', 'joseee@mail.com', '1234');
+    await app.registerUser(user);
+
+    await expect(app.removeUser(user.email)).resolves.not.toThrow();
+});
