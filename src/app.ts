@@ -10,6 +10,7 @@ import { DuplicateUserError } from "./errors/duplicate-user-error";
 import { RentRepo } from "./ports/rent-repo";
 import { UserRepo } from "./ports/user-repo";
 import { BikeRepo } from "./ports/bike-repo";
+import { UserHasOpenRentError } from "./errors/user-has-open-rent-error";
 
 export class App {
     crypt: Crypt = new Crypt()
@@ -46,6 +47,9 @@ export class App {
 
     async removeUser(email: string): Promise<void> {
         await this.findUser(email)
+        if ((await this.rentRepo.findOpenFor(email)).length > 0) {
+            throw new UserHasOpenRentError()
+        }
         await this.userRepo.remove(email)
     }
     
