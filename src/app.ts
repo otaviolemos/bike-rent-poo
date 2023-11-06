@@ -59,8 +59,7 @@ export class App {
             throw new UnavailableBikeError()
         }
         const user = await this.findUser(userEmail)
-        bike.available = false
-        await this.bikeRepo.update(bikeId, bike)
+        await this.bikeRepo.updateAvailability(bikeId, false)
         const newRent = new Rent(bike, user, new Date())
         return await this.rentRepo.add(newRent)
     }
@@ -71,8 +70,7 @@ export class App {
         if (!rent) throw new Error('Rent not found.')
         rent.end = now
         await this.rentRepo.update(rent.id, rent)
-        rent.bike.available = true
-        await this.bikeRepo.update(rent.bike.id, rent.bike)
+        await this.bikeRepo.updateAvailability(rent.bike.id, true)
         const hours = diffHours(rent.end, rent.start)
         return hours * rent.bike.rate
     }
@@ -86,10 +84,8 @@ export class App {
     }
 
     async moveBikeTo(bikeId: string, location: Location) {
-        const bike = await this.findBike(bikeId)
-        bike.location.latitude = location.latitude
-        bike.location.longitude = location.longitude
-        await this.bikeRepo.update(bikeId, bike)
+        await this.findBike(bikeId)
+        await this.bikeRepo.updateLocation(bikeId, location.latitude, location.longitude)
     }
 
     async findBike(bikeId: string): Promise<Bike> {
