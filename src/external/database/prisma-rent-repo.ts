@@ -26,7 +26,11 @@ export class PrismaRentRepo implements RentRepo {
 
     async find(id: String): Promise<Rent> {
         return await prisma.rent.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                bike: true,
+                user: true
+            }
         })
     } 
 
@@ -40,6 +44,10 @@ export class PrismaRentRepo implements RentRepo {
                     }},
                     { end: null }
                 ]
+            },
+            include: {
+                bike: true,
+                user: true
             }
         })
     }
@@ -50,6 +58,10 @@ export class PrismaRentRepo implements RentRepo {
                 user: {
                     is: { email: userEmail }
                 }
+            },
+            include: {
+                bike: true,
+                user: true
             }
         })
     }
