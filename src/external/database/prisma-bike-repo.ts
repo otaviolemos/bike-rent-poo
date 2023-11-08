@@ -62,20 +62,14 @@ export class PrismaBikeRepo implements BikeRepo {
 
     async updateAvailability(id: string, available: boolean): Promise<void> {
       await prisma.bike.update({
-        where: {
-          id
-        },
-        data: {
-          available
-        }
+        where: { id },
+        data: { available }
       })
     }
 
     async updateLocation(id: string, latitude: number, longitude: number): Promise<void> {
       await prisma.bike.update({
-        where: {
-          id
-        },
+        where: { id },
         data: {
           latitude,
           longitude

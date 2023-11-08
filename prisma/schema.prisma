@@ -15,6 +15,7 @@ model User {
   name     String
   email    String @unique
   password String
+  rents    Rent[]
 }
 
 model Bike {
@@ -30,6 +31,7 @@ model Bike {
   latitude    Float
   longitude   Float
   imageUrls   ImageUrl[]
+  rents       Rent[]
 }
 
 model ImageUrl {
@@ -37,4 +39,14 @@ model ImageUrl {
   url    String
   bike   Bike   @relation(fields: [bikeId], references: [id], onDelete: Cascade)
   bikeId String
+}
+
+model Rent {
+  id     String @id @default(uuid())
+  bike   Bike   @relation(fields: [bikeId], references: [id], onDelete: Cascade)
+  bikeId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  start  DateTime
+  end    DateTime?
 }

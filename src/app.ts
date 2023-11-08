@@ -68,8 +68,7 @@ export class App {
         const now = new Date()
         const rent = await this.rentRepo.findOpen(bikeId, userEmail)
         if (!rent) throw new Error('Rent not found.')
-        rent.end = now
-        await this.rentRepo.update(rent.id, rent)
+        await this.rentRepo.updateEnd(rent.id, now)
         await this.bikeRepo.updateAvailability(rent.bike.id, true)
         const hours = diffHours(rent.end, rent.start)
         return hours * rent.bike.rate
