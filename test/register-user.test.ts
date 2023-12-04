@@ -9,6 +9,7 @@ describe('Register user route', () => {
 
     afterAll(async () => {
         await prisma.user.deleteMany({})
+        server.close()
     })
 
     it('registers a user with valid data', async () => {
@@ -25,7 +26,7 @@ describe('Register user route', () => {
             })
     })
 
-    it.only('returns 400 when trying to register duplicate user', async () => {
+    it('returns 400 when trying to register duplicate user', async () => {
         await request(server)
             .post('/api/users')
             .send({
